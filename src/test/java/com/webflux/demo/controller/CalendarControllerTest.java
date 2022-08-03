@@ -64,16 +64,18 @@ class CalendarControllerTest extends SpringWebfluxApplicationTests {
         log.info(" ::::: updateSchedule ::::: ");
 
         long updateIdx = 1;
-        final String updateTitle = "Update Title";
+        final String updateTitle = "Update Title !!!!";
 
         ScheduleDto scheduleDTO = calendarController.getSchedulesOne(updateIdx)
+                .doOnNext(dt -> {
+                    log.info(":::: before TITLE ::: {}", dt.getTitle());
+                })
                 .flatMap(dt -> {
                     dt.setTitle(updateTitle);
                     return calendarController.updateSchedule(dt.getId(), dt);
                 }).block();
 
-        log.info("scheduleDTO.getTitle() {}", scheduleDTO.getTitle());
-        log.info("updateTitle {}", updateTitle);
+        log.info(":::: after TITLE ::: {}", scheduleDTO.getTitle());
 
         assertEquals(scheduleDTO.getTitle(), updateTitle);
     }
@@ -83,7 +85,6 @@ class CalendarControllerTest extends SpringWebfluxApplicationTests {
     void deleteSchedule() {
         log.info(" ::::: deleteSchedule ::::: ");
         long deleteIdx = 4L;
-
         ScheduleDto result = calendarController.deleteSchedule(deleteIdx)
                 .then(calendarController.getSchedulesOne(deleteIdx))
                 .block();
